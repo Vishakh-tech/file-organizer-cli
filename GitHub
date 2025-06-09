@@ -1,0 +1,50 @@
+# 🛠️ File Organizer CLI Tool
+
+"""
+This is a command-line tool written in Python to organize files in a specified directory.
+It categorizes files into folders based on their extensions (e.g., images, videos, documents).
+
+✅ No installation is needed for dependencies — all used modules (`os`, `shutil`, `argparse`, `pathlib`) are part of Python's standard library.
+"""
+
+import os
+import shutil
+import argparse
+from pathlib import Path
+
+# Define file categories
+FILE_CATEGORIES = {
+    "Images": [".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff"],
+    "Videos": [".mp4", ".mov", ".avi", ".mkv", ".flv"],
+    "Documents": [".pdf", ".docx", ".txt", ".xlsx", ".pptx"],
+    "Audio": [".mp3", ".wav", ".aac", ".flac"],
+    "Archives": [".zip", ".tar", ".gz", ".rar"],
+    "Scripts": [".py", ".js", ".sh", ".bat"],
+    "Others": []
+}
+
+def get_category(extension):
+    for category, extensions in FILE_CATEGORIES.items():
+        if extension.lower() in extensions:
+            return category
+    return "Others"
+
+def organize_files(directory):
+    directory = Path(directory)
+    if not directory.exists() or not directory.is_dir():
+        print(f"[!] Directory does not exist: {directory}")
+        return
+
+    for file in directory.iterdir():
+        if file.is_file():
+            category = get_category(file.suffix)
+            target_dir = directory / category
+            target_dir.mkdir(exist_ok=True)
+            shutil.move(str(file), target_dir / file.name)
+            print(f"[+] Moved: {file.name} -> {category}/")
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description="Organize files in a folder by file type.")
+    parser.add_argument("directory", help="Path to the directory to organize")
+    args = parser.parse_args()
+    organize_files(args.directory)
